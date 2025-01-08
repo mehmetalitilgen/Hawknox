@@ -1,1 +1,1 @@
-![Hawknox](/home/mehmet/Desktop/Hawknox/hawk.png)
+![Hawknox](hawk.png)
