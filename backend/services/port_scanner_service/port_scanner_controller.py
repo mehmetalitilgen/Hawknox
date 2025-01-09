@@ -6,15 +6,14 @@ open_ports = {}
 
 async def scan_single_port(host, port, service_name):
     try:
-        # Asenkron bağlantı aç
         reader, writer = await asyncio.open_connection(host=host, port=port)
-        open_ports[port] = service_name  # Port açıksa kaydet
+        open_ports[port] = service_name  
         writer.close()
-        await writer.wait_closed()  # Bağlantının tamamen kapanmasını bekle
+        await writer.wait_closed() 
     except (asyncio.TimeoutError, ConnectionRefusedError):
-        pass  # Zaman aşımı veya bağlantı reddedilirse boş geç
+        pass  
     except Exception as e:
-        print(f"Port {port} taranırken hata oluştu: {e}")
+        print(f"An error occurred while scanning port {port}: {e}")
 
 async def scan_port_controller_async(data):
     ports = read_json_file(port_json)
@@ -35,8 +34,8 @@ def read_json_file(path):
             data = json.load(file)
         return data
     except FileNotFoundError:
-        print(f"Hata: '{path}' dosyası bulunamadı.")
+        print(f"Error: File '{path}' not found.")
         return None
     except json.JSONDecodeError:
-        print(f"Hata: '{path}' dosyasının JSON formatı geçerli değil.")
+        print(f"Error: Invalid JSON format in '{path}'.")
         return None

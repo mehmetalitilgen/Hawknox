@@ -1,0 +1,10 @@
+# Python cache dosyaları
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Sanal environment klasörü
+env/
+venv/
+*.env
