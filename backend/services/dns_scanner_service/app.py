@@ -4,7 +4,7 @@ from dns_scanner_controller import dns_scan_controller
 app = Flask(__name__)
 
 @app.route('/health', methods=['GET'])
-def ssl_scanner_health_check():
+def dns_scanner_health_check():
     return jsonify({"status": "DNS Scanner Service is running"}), 200
 
 @app.route("/dns-scan", methods=["POST"])

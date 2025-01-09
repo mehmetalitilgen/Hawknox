@@ -1,71 +1,147 @@
-""" 
-A (Address) Kaydı: hackod.com gibi bir alan adının IP adresini döndürür.
-MX (Mail Exchange) Kaydı: E-posta sunucusunu ve önceliğini gösterir.
-NS (Name Server) Kaydı: Alan adı için yetkili ad sunucularını listeler.
-CNAME (Canonical Name) Kaydı: Alan adının diğer bir adla eşleştirildiğini gösterir.
-TXT (Text) Kaydı: SPF, DMARC gibi text tabanlı bilgiler sunabilir.
-SOA (Start of Authority) Kaydı: Alan adı için otorite bilgilerini (primary DNS sunucusu, sorumlu kişi vb.) içerir.
-"""
+import re, argparse, random, colorama
+
+from selenium import webdriver
+
+from selenium.common.exceptions import TimeoutException, WebDriverException
+
+from datetime import datetime
 
 
-import dns.resolver
 
-# A (Address) kayıtları sorgusu
-print("🔹 A (Address) Kayıtları: ")
-try:
-    a_records = dns.resolver.resolve('hackod.com', 'A')
-    for ipval in a_records:
-        print(f"IP Adresi: {ipval.to_text()} - TTL: {a_records.rrset.ttl} saniye")
-except Exception as e:
-    print(f"A kaydı hatası: {e}")
+colorama.init(autoreset=True)
 
-# MX (Mail Exchange) kayıtları sorgusu
-print("\n🔹 MX (Mail Exchange) Kayıtları: ")
-try:
-    mx_records = dns.resolver.resolve('google.com', 'MX')
-    for mx in mx_records:
-        print(f"Mail Sunucusu: {mx.exchange} - Öncelik: {mx.preference} - TTL: {mx_records.rrset.ttl} saniye")
-except Exception as e:
-    print(f"MX kaydı hatası: {e}")
 
-# NS (Name Server) kayıtları sorgusu
-print("\n🔹 NS (Name Server) Kayıtları: ")
-try:
-    ns_records = dns.resolver.resolve('google.com', 'NS')
-    for ns in ns_records:
-        print(f"Name Server: {ns.target} - TTL: {ns_records.rrset.ttl} saniye")
-except Exception as e:
-    print(f"NS kaydı hatası: {e}")
 
-# CNAME (Canonical Name) kayıtları sorgusu
-print("\n🔹 CNAME (Canonical Name) Kayıtları: ")
-try:
-    cname_records = dns.resolver.resolve('www.google.com', 'CNAME')
-    for cname in cname_records:
-        print(f"Canonical Name: {cname.target} - TTL: {cname_records.rrset.ttl} saniye")
-except Exception as e:
-    print(f"CNAME kaydı hatası: {e}")
 
-# TXT (Text) kayıtları sorgusu
-print("\n🔹 TXT (Text) Kayıtları: ")
-try:
-    txt_records = dns.resolver.resolve('google.com', 'TXT')
-    for txt in txt_records:
-        print(f"TXT Kaydı: {txt.to_text()} - TTL: {txt_records.rrset.ttl} saniye")
-except Exception as e:
-    print(f"TXT kaydı hatası: {e}")
+def check_dependencies():
+    
+    try:
+        
+        import selenium
+        
+    except ImportError:
+        
+        print("Please install the 'selenium' package using 'pip install selenium'.")
+        
+        sys.exit(1)
 
-# SOA (Start of Authority) kayıtları sorgusu
-print("\n🔹 SOA (Start of Authority) Kayıtları: ")
-try:
-    soa_records = dns.resolver.resolve('google.com', 'SOA')
-    for soa in soa_records:
-        print(f"Primary Name Server: {soa.mname}")
-        print(f"Responsible Party: {soa.rname}")
-        print(f"Serial Number: {soa.serial}")
-        print(f"Refresh Interval: {soa.refresh} saniye")
-        print(f"Retry Interval: {soa.retry} saniye")
-        print(f"Expire Limit: {soa.expire} saniye")
-        print(f"Minimum TTL: {soa.minimum} saniye")
-except Exception as e:
-    print(f"SOA kaydı hatası: {e}")
+    try:
+        
+        import colorama
+        
+    except ImportError:
+        
+        print("Please install the 'colorama' package using 'pip install colorama'.")
+        
+        sys.exit(1)
+
+
+def process_js_url(driver, js_url, output_lines):
+    
+    output_lines.append(f'Processing JS URL: {js_url}\n')
+    
+    print(f'{bold}{random_color}Processing JS URL: {js_url}\n')
+
+    try:
+        
+        # Navigate to the JavaScript file
+        driver.set_page_load_timeout(10)
+        
+        driver.get(js_url)
+
+        # Retrieve the contents of the file
+        javascript_code = driver.execute_script("return document.documentElement.innerText")
+
+        # Check for sensitive data in the file
+        matches = [pattern.findall(javascript_code) for pattern in patterns.values()]
+
+        if any(matches):
+            
+            output_lines.append("Sensitive data found:\n")
+            
+            print(f"{bold}{random_color}Sensitive data found:\n")
+            
+
+            for pattern_name in patterns:
+                
+                pattern = patterns.get(pattern_name)
+                
+                pattern_matches = pattern.findall(javascript_code)
+                
+
+                if pattern_matches:
+                    
+                    output_lines.append(f'{pattern_name.upper()} Found:')
+                    
+                    print(f'{bold}{random_color}{pattern_name.upper()} Found:')
+
+                    for match in pattern_matches:
+                        
+                        output_lines.append(f'- {match}')
+                        
+                        print(f'{bold}{random_color}- {match}')
+
+                    output_lines.append('')
+                    
+                    print('')
+                    
+        else:
+            
+            output_lines.append("No sensitive data found.\n")
+            
+            print(f"{bold}{random_color}No sensitive data found.\n")
+
+    except TimeoutException:
+        
+        output_lines.append("Timeout error occurred while loading the URL.\n")
+        
+    except WebDriverException:
+        
+        output_lines.append("WebDriver error occurred while processing the URL.\n")
+
+
+def main():
+    
+    banner()
+    
+    check_dependencies()
+
+    # Create a new instance of the Firefox driver
+    options = webdriver.FirefoxOptions()
+    
+    options.headless = True
+    
+    driver = webdriver.Firefox(options=options)
+
+    # Read the file containing JS URLs
+    with open(list_file_path) as f:
+        
+        js_urls = f.read().splitlines()
+
+    output_lines = []
+
+    for js_url in js_urls:
+        
+        process_js_url(driver, js_url, output_lines)
+
+    # Save the output to a file
+    with open(output_file_path, 'w') as f:
+        
+        f.writelines(output_lines)
+
+    # Close the driver
+    driver.quit()
+
+
+if __name__ == "__main__":
+    
+   # Define the regex patterns
+    patterns = {
+    'api_key': re.compile(r'[A-Za-z0-9]{32}'),
+    'creds': re.compile(r'(?:password|passwd|pwd|user|key|username|usr|email|e-mail|mail)\s*=\s*[\'"]?([A-Za-z0-9@#$%^&*()_+-]+)'),
+    'personal_data': re.compile(r'(?:name|email|phone)\s*=\s*[\'"]?([^\'" >]+)'),
+    'token': re.compile(r'[A-Za-z0-9-_]{64}'),
+    'url': re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'),
+    'custom_pattern': re.compile(r'(?i)((access_key|access_token|admin_pass|admin_user|algolia_admin_key|algolia_api_key|alias_pass|alicloud_access_key|amazon_secret_access_key|amazonaws|ansible_vault_password|aos_key|api_key|api_key_secret|api_key_sid|api_secret|api.googlemaps AIza|apidocs|apikey|apiSecret|app_debug|app_id|app_key|app_log_level|app_secret|appkey|appkeysecret|application_key|appsecret|appspot|auth_token|authorizationToken|authsecret|aws_access|aws_access_key_id|aws_bucket|aws_key|aws_secret|aws_secret_key|aws_token|AWSSecretKey|b2_app_key|bashrc password|bintray_apikey|bintray_gpg_password|bintray_key|bintraykey|bluemix_api_key|bluemix_pass|browserstack_access_key|bucket_password|bucketeer_aws_access_key_id|bucketeer_aws_secret_access_key|built_branch_deploy_key|bx_password|cache_driver|cache_s3_secret_key|cattle_access_key|cattle_secret_key|certificate_password|ci_deploy_password|client_secret|client_zpk_secret_key|clojars_password|cloud_api_key|cloud_watch_aws_access_key|cloudant_password|cloudflare_api_key|cloudflare_auth_key|cloudinary_api_secret|cloudinary_name|codecov_token|config|conn.login|connectionstring|consumer_key|consumer_secret|credentials|cypress_record_key|database_password|database_schema_test|datadog_api_key|datadog_app_key|db_password|db_server|db_username|dbpasswd|dbpassword|dbuser|deploy_password|digitalocean_ssh_key_body|digitalocean_ssh_key_ids|docker_hub_password|docker_key|docker_pass|docker_passwd|docker_password|dockerhub_password|dockerhubpassword|dot-files|dotfiles|droplet_travis_password|dynamoaccesskeyid|dynamosecretaccesskey|elastica_host|elastica_port|elasticsearch_password|encryption_key|encryption_password|env.heroku_api_key|env.sonatype_password|eureka.awssecretkey)[a-z0-9_ .\-,]{0,25})(=|>|:=|\|\|:|<=|=>|:).{0,5}['\"]([0-9a-zA-Z\-_=]{8,64})['\"]')}
+
+    main()

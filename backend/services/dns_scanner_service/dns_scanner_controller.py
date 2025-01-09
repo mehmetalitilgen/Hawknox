@@ -21,8 +21,6 @@ def dns_scan_controller(data):
         "TXT": [],
         "SOA": {}
     }
-
-    # A (Address) kayıtları sorgusu
     try:
         a_records = dns.resolver.resolve(domain, 'A')
         for ipval in a_records:
@@ -33,7 +31,6 @@ def dns_scan_controller(data):
     except Exception as e:
         results["A"] = {"error": str(e)}
 
-    # MX (Mail Exchange) kayıtları sorgusu
     try:
         mx_records = dns.resolver.resolve(domain, 'MX')
         for mx in mx_records:
@@ -45,7 +42,6 @@ def dns_scan_controller(data):
     except Exception as e:
         results["MX"] = {"error": str(e)}
 
-    # NS (Name Server) kayıtları sorgusu
     try:
         ns_records = dns.resolver.resolve(domain, 'NS')
         for ns in ns_records:
@@ -56,7 +52,6 @@ def dns_scan_controller(data):
     except Exception as e:
         results["NS"] = {"error": str(e)}
 
-    # CNAME (Canonical Name) kayıtları sorgusu
     try:
         cname_records = dns.resolver.resolve(domain, 'CNAME')
         for cname in cname_records:

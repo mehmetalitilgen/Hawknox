@@ -7,7 +7,7 @@ app = Quart(__name__)
 def port_scanner_health_check():
     return jsonify({"status": "Port Scanner Service is running"}), 200
 
-@app.route("/scan-url", methods=["POST"])
+@app.route("/port-scan", methods=["POST"])
 async def scan_port():
     data = await request.get_json()
     result = await scan_port_controller_async(data)  
