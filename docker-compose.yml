@@ -1,0 +1,82 @@
+version: "3.8"
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: ./backend/gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - dns_scanner_service
+      - directory_scanner_service
+      - js_file_scanner_service
+      - port_scanner_service
+      - ssl_scanner_service
+      - whois_scanner_service
+    networks:
+      - app-network
+
+  dns_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/dns_scanner_service/Dockerfile
+    ports:
+      - "5004:5004"
+    networks:
+      - app-network
+
+  directory_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/directory_scanner_service/Dockerfile
+    ports:
+      - "5007:5007"
+    networks:
+      - app-network
+
+  js_file_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/js_file_scanner_service/Dockerfile
+    ports:
+      - "5006:5006"
+    networks:
+      - app-network
+
+  port_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/port_scanner_service/Dockerfile
+    ports:
+      - "5003:5003"
+    networks:
+      - app-network
+
+  ssl_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/ssl_scanner_service/Dockerfile
+    ports:
+      - "5002:5002"
+    networks:
+      - app-network
+
+  whois_scanner_service:
+    build:
+      context: .
+      dockerfile: ./backend/services/whois_scanner_service/Dockerfile
+    ports:
+      - "5005:5005"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

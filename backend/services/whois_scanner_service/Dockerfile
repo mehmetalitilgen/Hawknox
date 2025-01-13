@@ -1,0 +1,12 @@
+# Python base image
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY ./backend/services/whois_scanner_service /app
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5005
+
+CMD ["python", "app.py"]

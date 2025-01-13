@@ -1,0 +1,5 @@
+Flask==2.0.3
+Flask-Limiter==2.6.0
+redis==4.3.0
+requests==2.26.0
+werkzeug==2.0.3
