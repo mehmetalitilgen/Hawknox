@@ -30,6 +30,12 @@ def directory_scan():
 
 @gateway.route('/dns-scan', methods=['POST'])
 def dns_scan():
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "CORS Preflight Passed"})
+        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return response, 200
     try:
         data = request.get_json()
         response = requests.post(f"{SERVICES['dns_scanner']}/dns-scan", json=data)
@@ -47,8 +53,15 @@ def js_file_scan():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@gateway.route('/port-scan', methods=['POST'])
+@gateway.route('/port-scan', methods=['OPTIONS', 'POST'])
 def port_scan():
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "CORS Preflight Passed"})
+        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return response, 200
+
     try:
         data = request.get_json()
         response = requests.post(f"{SERVICES['port_scanner']}/port-scan", json=data)
