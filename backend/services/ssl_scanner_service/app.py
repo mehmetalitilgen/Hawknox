@@ -15,4 +15,4 @@ def scan_ssl():
     return jsonify(scan_results)  # Return the results as JSON
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=5002, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

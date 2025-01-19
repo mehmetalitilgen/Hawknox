@@ -1,26 +1,25 @@
 import React, { useState } from "react";
-import apiInstance from "../utils/axios";
+import apiInstance from "../../utils/axios";
 
-function DnsScanner() {
+function WhoIsScanner() {
   const [domain, setDomain] = useState("");
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleScan = async () => {
     if (!domain) {
-      alert("Enter a URL!");
+      alert("Lütfen bir Url girin!");
       return;
     }
 
     setIsLoading(true);
-
     try {
-      const response = await apiInstance.post("/dns-scan", { domain });
-      setResult(response.data);
+      const response = await apiInstance.post("/whois-scan", { domain });
+      setResult(response.data || {});
       console.log(response.data);
     } catch (error) {
-      console.error("Hata", error);
-      alert(error.response?.data?.error || "TARAMADA HATA OLUŞTU");
+      console.error("HATA:", error);
+      alert(error.response?.data?.error || "Taramada hata oluştu.");
     } finally {
       setIsLoading(false);
     }
@@ -28,10 +27,10 @@ function DnsScanner() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <h2>DNS Tarayıcı</h2>
+      <h2>WHO IS SCANNER</h2>
       <input
         type="text"
-        placeholder="Domain giriniz"
+        placeholder="URL giriniz"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
         style={{ width: "300px", padding: "10px", borderRadius: "4px" }}
@@ -63,18 +62,10 @@ function DnsScanner() {
           }}
         >
           <h3>Sonuçlar:</h3>
-          {/* <ul>
-            {Object.entries(result).map(([port, service]) => (
-              <li key={port}>
-                <strong>Port:</strong> {port}, <strong>Servis:</strong>{" "}
-                {service}
-              </li>
-            ))}
-          </ul> */}
         </div>
       )}
     </div>
   );
 }
 
-export default DnsScanner;
+export default WhoIsScanner;

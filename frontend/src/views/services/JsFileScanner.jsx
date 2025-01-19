@@ -1,23 +1,25 @@
 import React, { useState } from "react";
-import apiInstance from "../utils/axios";
+import apiInstance from "../../utils/axios";
 
-function PortScanner() {
-  const [url, setUrl] = useState("");
+function JsFileScanner() {
+  const [domain, setDomain] = useState("");
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleScan = async () => {
-    if (!url) {
-      alert("Lütfen bir URL girin!");
+    if (!domain) {
+      alert("Lütfen bir Url girin!");
       return;
     }
 
     setIsLoading(true);
+
     try {
-      const response = await apiInstance.post("/port-scan", { url });
-      setResult(response.data.Port || {});
+      const response = await apiInstance.post("/js-file-scan", { domain });
+      setResult(response.data || {});
+      console.log(response.data);
     } catch (error) {
-      console.error("Hata:", error);
+      console.error("HATA:", error);
       alert(error.response?.data?.error || "Taramada hata oluştu.");
     } finally {
       setIsLoading(false);
@@ -26,12 +28,12 @@ function PortScanner() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <h2>Port Tarayıcı</h2>
+      <h2>JS FİLE SCANNER</h2>
       <input
         type="text"
         placeholder="URL giriniz"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
+        value={domain}
+        onChange={(e) => setDomain(e.target.value)}
         style={{ width: "300px", padding: "10px", borderRadius: "4px" }}
       />
       <br />
@@ -61,18 +63,10 @@ function PortScanner() {
           }}
         >
           <h3>Sonuçlar:</h3>
-          <ul>
-            {Object.entries(result).map(([port, service]) => (
-              <li key={port}>
-                <strong>Port:</strong> {port}, <strong>Servis:</strong>{" "}
-                {service}
-              </li>
-            ))}
-          </ul>
         </div>
       )}
     </div>
   );
 }
 
-export default PortScanner;
+export default JsFileScanner;

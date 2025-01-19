@@ -11,7 +11,7 @@ def js_file_scanner_health_check():
 def scan_js_file():
     data = request.get_json()
     scan_results = js_file_scan_controller(data)
-    return scan_results
+    return jsonify(scan_results)
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=5006, debug=True)
+    app.run(host='0.0.0.0', port=5006, debug=True)

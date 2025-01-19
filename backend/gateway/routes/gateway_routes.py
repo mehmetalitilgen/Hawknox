@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import CORS  
 import requests
 
-gateway = Blueprint("gateway",__name__)
+gateway = Blueprint("gateway", __name__)
+CORS(gateway, resources={r"/*": {"origins": "http://localhost:5173"}})  
 
 SERVICES = {
     "directory_scanner": "http://directory_scanner_service:5007",
@@ -13,29 +15,23 @@ SERVICES = {
 }
 
 
-@gateway.route("/health-check",methods=["GET"])
+@gateway.route("/health-check", methods=["GET"])
 def health_check():
     return jsonify({"status": "API Gateway is healthy!"}), 200
 
 
-@gateway.route("/directory-scan",methods=['POST'])
+@gateway.route("/directory-scan", methods=['POST'])
 def directory_scan():
     try:
         data = request.get_json()
-        response = requests.post(f"{SERVICES['directory_scanner']}/directory-scan")
-        return jsonify(response.json()),response.status_code
+        response = requests.post(f"{SERVICES['directory_scanner']}/directory-scan", json=data)
+        return jsonify(response.json()), response.status_code
     except Exception as e:
-        return jsonify({"error":str(e)}),500
+        return jsonify({"error": str(e)}), 500
     
 
 @gateway.route('/dns-scan', methods=['POST'])
 def dns_scan():
-    if request.method == 'OPTIONS':
-        response = jsonify({"status": "CORS Preflight Passed"})
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        return response, 200
     try:
         data = request.get_json()
         response = requests.post(f"{SERVICES['dns_scanner']}/dns-scan", json=data)
@@ -53,15 +49,8 @@ def js_file_scan():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@gateway.route('/port-scan', methods=['OPTIONS', 'POST'])
+@gateway.route('/port-scan', methods=['POST'])
 def port_scan():
-    if request.method == 'OPTIONS':
-        response = jsonify({"status": "CORS Preflight Passed"})
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        return response, 200
-
     try:
         data = request.get_json()
         response = requests.post(f"{SERVICES['port_scanner']}/port-scan", json=data)

@@ -43,6 +43,7 @@ def directory_scan_controller(data):
     Start scanning directories for the given base URL.
     """
     base_url = data.get("base_url")
+    print(base_url)
     if not base_url:
         return [{"error": "Base URL is missing"}]
 
